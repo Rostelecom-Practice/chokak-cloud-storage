@@ -27,7 +27,7 @@ class FileSystemStorageServiceTest {
 	@Test
 	void testSave() throws IOException {
 		String originalFilename = "test.txt";
-		byte[] content = "Save file test!".getBytes();
+		byte[] content = "Save file test".getBytes();
 		MockMultipartFile multipartFile = new MockMultipartFile(
 				"file", originalFilename, "text/plain", content
 		);
