@@ -1,6 +1,5 @@
-package com.practice.review;
+package com.practice.review.service;
 
-import com.practice.review.service.FileSystemStorageService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.Resource;
