@@ -8,9 +8,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.nio.file.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FileSystemStorageServiceTest {
 
@@ -69,11 +69,9 @@ class FileSystemStorageServiceTest {
 	}
 
 	@Test
-	void testLoad_NotFound() throws MalformedURLException, FileNotFoundException {
+	void testLoad_NotFound()  {
 		String notExist = "not_found.txt";
 
-		Resource resource = storageService.load(notExist);
-
-		assertThat(resource.exists()).isFalse();
+		assertThrows(FileNotFoundException.class, () -> storageService.load(notExist));
 	}
 }

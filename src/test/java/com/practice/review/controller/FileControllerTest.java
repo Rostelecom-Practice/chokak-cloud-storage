@@ -14,7 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +39,6 @@ class FileControllerTest {
     private StorageService storageService;
 
     @Test
-    @DisplayName("Test Load File")
     void testUpload_Success() throws Exception {
         byte[] content = "test image content".getBytes(StandardCharsets.UTF_8);
         MockMultipartFile mockFile = new MockMultipartFile(
@@ -55,12 +53,11 @@ class FileControllerTest {
 
         mockMvc.perform(multipart("/images/images")
                         .file(mockFile))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.url").value("/images/saved.jpg"));
     }
 
     @Test
-    @DisplayName("Test Get File")
     void testGetImage_Success() throws Exception {
         String filename = "example.jpg";
         byte[] fakeImageData = "fake image bytes".getBytes(StandardCharsets.UTF_8);
@@ -85,7 +82,6 @@ class FileControllerTest {
     }
 
     @Test
-    @DisplayName("Test Delete File")
     void testDelete_Success() throws Exception {
         String filename = "to-delete.jpg";
         doNothing().when(storageService).delete(eq(filename));
