@@ -1,6 +1,9 @@
 package com.practice.review.controller;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +35,19 @@ public class FileController {
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) throws IOException {
         String filename = storageService.save(file);
         String url = "/images/" + filename;
-        return ResponseEntity.ok(Map.of("url", url));
+        return ResponseEntity.created(URI.create(url)).body(Map.of("url", url));
     }
 
     @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
-        Resource resource = storageService.load(filename);
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(resource);
+        try {
+            Resource resource = storageService.load(filename);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        } catch (RuntimeException | MalformedURLException | FileNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{filename:.+}")

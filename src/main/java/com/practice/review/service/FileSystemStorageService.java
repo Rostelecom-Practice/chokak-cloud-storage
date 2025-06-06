@@ -1,5 +1,7 @@
 package com.practice.review.service;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -8,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -30,13 +33,13 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public Resource load(String filename) {
-        try {
-            Path filePath = root.resolve(filename);
-            return new UrlResource(filePath.toUri());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("File not found", e);
+    public Resource load(String filename) throws FileNotFoundException {
+        File file = root.resolve(filename).toFile();
+
+        if (!file.exists()) {
+            throw new FileNotFoundException();
         }
+        return new FileSystemResource(file);
     }
 
     @Override
