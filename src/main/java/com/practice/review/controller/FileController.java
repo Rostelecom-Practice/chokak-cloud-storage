@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,11 @@ public class FileController {
 
     @PostMapping("/images")
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) throws IOException {
+        if (file.getSize()>50 * 1024 * 1024){
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("error", "Max file size — 50MB"));
+        }
         String filename = storageService.save(file);
         String url = "/images/" + filename;
         return ResponseEntity.created(URI.create(url)).body(Map.of("url", url));
@@ -42,8 +48,18 @@ public class FileController {
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         try {
             Resource resource = storageService.load(filename);
+
+            String ext = StringUtils.getFilenameExtension(filename);
+            MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+
+            if ("jpg".equalsIgnoreCase(ext) || "jpeg".equalsIgnoreCase(ext)) {
+                mediaType = MediaType.IMAGE_JPEG;
+            } else if ("png".equalsIgnoreCase(ext)) {
+                mediaType = MediaType.IMAGE_PNG;
+            }
+
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .contentType(mediaType)
                     .body(resource);
         } catch (RuntimeException | MalformedURLException | FileNotFoundException e) {
             return ResponseEntity.notFound().build();
