@@ -10,13 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.practice.review.service.StorageService;
@@ -32,8 +26,9 @@ public class FileController {
     }
 
     @PostMapping("/images")
-    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) throws IOException {
-        String filename = storageService.save(file);
+    public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file,
+                                    @RequestHeader("X-User-Uid") String uid ) throws IOException {
+        String filename = storageService.save(file, uid);
         String url = "/images/" + filename;
         return ResponseEntity.created(URI.create(url)).body(Map.of("url", url));
     }
@@ -51,8 +46,9 @@ public class FileController {
     }
 
     @DeleteMapping("/{filename:.+}")
-    public ResponseEntity<Void> delete(@PathVariable String filename) throws IOException {
-        storageService.delete(filename);
+    public ResponseEntity<Void> delete(@PathVariable String filename,
+                                       @RequestHeader("X-User-Uid") String uid) throws IOException {
+        storageService.delete(filename, uid);
         return ResponseEntity.noContent().build();
     }
 }

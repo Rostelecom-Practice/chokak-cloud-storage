@@ -8,7 +8,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface StorageService {
-    String save(MultipartFile file) throws IOException;
+    String save(MultipartFile file, String ownerUid) throws IOException;
     Resource load(String filename) throws MalformedURLException, FileNotFoundException;
-    void delete(String filename) throws IOException;
+    void delete(String filename, String requesterUid) throws IOException;
 }

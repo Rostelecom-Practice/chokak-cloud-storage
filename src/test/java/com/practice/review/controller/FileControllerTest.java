@@ -48,11 +48,13 @@ class FileControllerTest {
                 content
         );
 
-        when(storageService.save(any(MockMultipartFile.class)))
+        when(storageService.save(any(MockMultipartFile.class), any(String.class)))
                 .thenReturn("saved.jpg");
 
+
         mockMvc.perform(multipart("/images/images")
-                        .file(mockFile))
+                        .file(mockFile)
+                        .header("X-User-Uid", "test-uid"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.url").value("/images/saved.jpg"));
     }
@@ -84,9 +86,10 @@ class FileControllerTest {
     @Test
     void testDelete_Success() throws Exception {
         String filename = "to-delete.jpg";
-        doNothing().when(storageService).delete(eq(filename));
+        doNothing().when(storageService).delete(eq(filename), any(String.class));
 
-        mockMvc.perform(delete("/images/{filename}", filename))
+        mockMvc.perform(delete("/images/{filename}", filename)
+                        .header("X-User-Uid", "test-uid"))
                 .andExpect(status().isNoContent());
     }
 

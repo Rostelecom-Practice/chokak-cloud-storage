@@ -1,7 +1,10 @@
 package com.practice.review.service;
 
+import com.practice.review.entity.ImageMetadata;
+import com.practice.review.repository.ImageMetadataRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mockito;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -11,6 +14,7 @@ import java.io.InputStream;
 import java.nio.file.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 
 class FileSystemStorageServiceTest {
 
@@ -18,11 +22,13 @@ class FileSystemStorageServiceTest {
 	Path tempDir;
 
 	FileSystemStorageService storageService;
+	ImageMetadataRepository metadataRepository;
 
 	@BeforeEach
 	void setUp() throws IOException {
 		String storageLocation = tempDir.toString();
-		storageService = new FileSystemStorageService(storageLocation);
+		metadataRepository = Mockito.mock(ImageMetadataRepository.class);
+		storageService = new FileSystemStorageService(storageLocation, metadataRepository);
 	}
 
 	@Test
@@ -33,7 +39,9 @@ class FileSystemStorageServiceTest {
 				"file", originalFilename, "text/plain", content
 		);
 
-		String savedFilename = storageService.save(multipartFile);
+		Mockito.when(metadataRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+		String savedFilename = storageService.save(multipartFile, "test-owner-uid");
 
 		assertThat(savedFilename).contains(originalFilename);
 		Path savedFilePath = tempDir.resolve(savedFilename);
@@ -63,7 +71,12 @@ class FileSystemStorageServiceTest {
 		Path filePath = tempDir.resolve(filename);
 		Files.createFile(filePath);
 
-		storageService.delete(filename);
+		Mockito.when(metadataRepository.findById(filename))
+				.thenReturn(java.util.Optional.of(new ImageMetadata(filename, "test-owner-uid")));
+
+
+		Mockito.doNothing().when(metadataRepository).deleteById(filename);
+		storageService.delete(filename, "test-owner-uid");
 
 		assertThat(Files.exists(filePath)).isFalse();
 	}
